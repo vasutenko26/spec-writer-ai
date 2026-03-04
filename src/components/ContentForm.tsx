@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Sparkles, Copy, Check, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const ContentForm = () => {
   const [topic, setTopic] = useState("");
@@ -17,49 +19,26 @@ const ContentForm = () => {
   const [result, setResult] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!topic.trim()) return;
     setIsLoading(true);
-    setTimeout(() => {
-      setResult(`# ${topic}
+    setResult(null);
 
-Сучасний ринок пропонує безліч варіантів, і вибір стає справжнім викликом. У цій статті ми розглянемо ключові аспекти, які допоможуть вам прийняти правильне рішення.
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-content", {
+        body: { topic, keywords, tone, wordCount: wordCount[0] },
+      });
 
-## Що потрібно знати перед вибором
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-Перш ніж розглядати конкретні моделі та пропозиції, важливо визначити свої потреби та бюджет. Це дозволить звузити коло пошуку та зосередитися на дійсно релевантних варіантах.
-
-### Основні критерії вибору
-
-При виборі варто звернути увагу на наступні параметри:
-
-- **Якість** — один з найважливіших факторів
-- **Ціна** — співвідношення ціна/якість
-- **Відгуки** — реальний досвід інших користувачів
-- **Гарантія** — умови обслуговування
-
-## Порівняння найкращих варіантів
-
-Ми провели детальний аналіз найпопулярніших варіантів на ринку та підготували об'єктивне порівняння.
-
-| Параметр | Варіант A | Варіант B | Варіант C |
-|----------|-----------|-----------|-----------|
-| Якість   | ⭐⭐⭐⭐⭐ | ⭐⭐⭐⭐ | ⭐⭐⭐ |
-| Ціна     | $$$ | $$ | $ |
-
-## Часті питання
-
-**Як обрати найкращий варіант?**
-Орієнтуйтесь на свої потреби, бюджет та відгуки реальних користувачів.
-
-**Де краще купувати?**
-Рекомендуємо офіційних дистриб'юторів та перевірені маркетплейси.
-
-## Висновки
-
-Вибір — це індивідуальний процес, який залежить від ваших потреб. Сподіваємось, наша стаття допомогла вам розібратися у ключових аспектах.`);
+      setResult(data.content);
+    } catch (e: any) {
+      console.error("Content generation error:", e);
+      toast.error(e.message || "Помилка генерації контенту");
+    } finally {
       setIsLoading(false);
-    }, 3000);
+    }
   };
 
   const handleCopy = () => {
@@ -137,7 +116,7 @@ const ContentForm = () => {
             className="w-full bg-hero-gradient border-0 text-primary-foreground hover:opacity-90"
           >
             {isLoading ? (
-              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Генерую контент...</>
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> AI генерує контент...</>
             ) : (
               <><Sparkles className="mr-2 h-4 w-4" /> Згенерувати контент</>
             )}

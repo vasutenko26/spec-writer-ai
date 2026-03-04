@@ -2,10 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Search, FileText, Download, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const BriefForm = () => {
   const [keyword, setKeyword] = useState("");
@@ -15,45 +16,37 @@ const BriefForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
 
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!keyword.trim()) return;
     setIsLoading(true);
-    // Simulate brief generation
-    setTimeout(() => {
-      setResult(`# Технічне завдання
+    setResult(null);
 
-## Ключове слово: "${keyword}"
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-brief", {
+        body: { keyword, language, region, contentType },
+      });
 
-### Рекомендовані параметри
-- **Обсяг тексту:** 2500–3500 слів
-- **Кількість заголовків H2:** 6–8
-- **Кількість заголовків H3:** 10–15
-- **Кількість абзаців:** 20–30
-- **Кількість зображень:** 4–6
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
 
-### Структура заголовків
-1. Вступ — що таке ${keyword}
-2. Основні переваги
-3. Як це працює
-4. Порівняння з аналогами
-5. Практичні поради
-6. Часті питання (FAQ)
-7. Висновки
-
-### SEO-вимоги
-- Title: до 60 символів, включає "${keyword}"
-- Meta Description: до 160 символів
-- Density ключового слова: 1.5–2.5%
-- LSI-ключові слова: включити 10–15 тематичних слів
-
-### Конкуренти (ТОП-5)
-1. example1.com — 3200 слів, 8 H2
-2. example2.com — 2800 слів, 6 H2
-3. example3.com — 4100 слів, 12 H2
-4. example4.com — 2100 слів, 5 H2
-5. example5.com — 3500 слів, 9 H2`);
+      setResult(data.content);
+    } catch (e: any) {
+      console.error("Brief generation error:", e);
+      toast.error(e.message || "Помилка генерації ТЗ");
+    } finally {
       setIsLoading(false);
-    }, 2000);
+    }
+  };
+
+  const handleExport = () => {
+    if (!result) return;
+    const blob = new Blob([result], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `brief-${keyword.replace(/\s+/g, "-")}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -65,7 +58,7 @@ const BriefForm = () => {
             Параметри для аналізу
           </CardTitle>
           <CardDescription>
-            Введіть ключове слово та параметри для створення ТЗ на основі SERP-аналізу
+            Введіть ключове слово та параметри для створення ТЗ на основі AI-аналізу
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -124,7 +117,7 @@ const BriefForm = () => {
             className="w-full bg-hero-gradient border-0 text-primary-foreground hover:opacity-90"
           >
             {isLoading ? (
-              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Аналізую SERP...</>
+              <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> AI аналізує та створює ТЗ...</>
             ) : (
               <><FileText className="mr-2 h-4 w-4" /> Створити ТЗ</>
             )}
@@ -140,7 +133,7 @@ const BriefForm = () => {
                 <FileText className="h-5 w-5 text-primary" />
                 Результат — Технічне завдання
               </CardTitle>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={handleExport}>
                 <Download className="mr-2 h-4 w-4" />
                 Експорт
               </Button>
