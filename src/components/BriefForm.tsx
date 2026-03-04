@@ -4,9 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Search, FileText, Download, Loader2 } from "lucide-react";
+import { Search, FileText, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import BriefResult from "./BriefResult";
 
 const BriefForm = () => {
   const [keyword, setKeyword] = useState("");
@@ -38,16 +39,6 @@ const BriefForm = () => {
     }
   };
 
-  const handleExport = () => {
-    if (!result) return;
-    const blob = new Blob([result], { type: "text/markdown" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `brief-${keyword.replace(/\s+/g, "-")}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
-  };
 
   return (
     <div className="space-y-6">
@@ -125,27 +116,7 @@ const BriefForm = () => {
         </CardContent>
       </Card>
 
-      {result && (
-        <Card className="animate-fade-in">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-primary" />
-                Результат — Технічне завдання
-              </CardTitle>
-              <Button variant="outline" size="sm" onClick={handleExport}>
-                <Download className="mr-2 h-4 w-4" />
-                Експорт
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="rounded-lg border border-border bg-secondary/50 p-6">
-              <pre className="whitespace-pre-wrap text-sm leading-relaxed font-sans">{result}</pre>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {result && <BriefResult content={result} />}
     </div>
   );
 };
