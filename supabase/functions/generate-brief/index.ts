@@ -1,22 +1,137 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-// SE Ranking Data API engine IDs (Google) by region
 const ENGINE_IDS: Record<string, number> = {
-  ua: 1830, // Google Ukraine
-  us: 1,    // Google USA
-  eu: 17,   // Google UK (as proxy for EU)
+  ua: 1830,
+  us: 1,
+  eu: 17,
 };
+
+interface ScrapedPage {
+  url: string;
+  title: string;
+  position: number;
+  wordCount: number;
+  imageCount: number;
+  h1: string[];
+  h2: string[];
+  h3: string[];
+}
+
+async function scrapePage(url: string): Promise<Omit<ScrapedPage, 'url' | 'title' | 'position'> | null> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml",
+        "Accept-Language": "uk,en;q=0.9",
+      },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (!res.ok) return null;
+
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("text/html")) return null;
+
+    const html = await res.text();
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    if (!doc) return null;
+
+    // Remove script/style/nav/footer to get cleaner text
+    for (const tag of ["script", "style", "nav", "footer", "header", "aside"]) {
+      doc.querySelectorAll(tag).forEach((el: any) => el.remove());
+    }
+
+    const bodyText = (doc.querySelector("body")?.textContent || "").replace(/\s+/g, " ").trim();
+    const wordCount = bodyText.split(/\s+/).filter(Boolean).length;
+
+    const imageCount = doc.querySelectorAll("img").length;
+
+    const extractHeadings = (tag: string): string[] => {
+      const headings: string[] = [];
+      doc.querySelectorAll(tag).forEach((el: any) => {
+        const text = (el.textContent || "").trim();
+        if (text && text.length < 200) headings.push(text);
+      });
+      return headings;
+    };
+
+    return {
+      wordCount,
+      imageCount,
+      h1: extractHeadings("h1"),
+      h2: extractHeadings("h2"),
+      h3: extractHeadings("h3"),
+    };
+  } catch (e) {
+    console.warn(`Failed to scrape ${url}:`, e instanceof Error ? e.message : e);
+    return null;
+  }
+}
+
+async function scrapeCompetitors(serpResults: any[]): Promise<ScrapedPage[]> {
+  const pages: ScrapedPage[] = [];
+
+  // Scrape up to 10 pages in parallel
+  const urls = serpResults.slice(0, 10).map((item, i) => ({
+    url: item.url || item.link || "",
+    title: item.title || "N/A",
+    position: item.position || (i + 1),
+  }));
+
+  const scrapePromises = urls.map(async ({ url, title, position }) => {
+    if (!url || url === "N/A") return null;
+    const scraped = await scrapePage(url);
+    if (!scraped) return { url, title, position, wordCount: 0, imageCount: 0, h1: [], h2: [], h3: [] };
+    return { url, title, position, ...scraped };
+  });
+
+  const results = await Promise.all(scrapePromises);
+  for (const r of results) {
+    if (r) pages.push(r);
+  }
+
+  return pages;
+}
+
+function formatScrapedTable(pages: ScrapedPage[]): string {
+  if (!pages.length) return "";
+
+  let table = "| № | URL | Title | Слів | H1 | H2 | H3 | Зображень |\n|---|-----|-------|------|----|----|----|-----------|\n";
+  pages.forEach((p, i) => {
+    const shortUrl = p.url.length > 50 ? p.url.substring(0, 47) + "..." : p.url;
+    const title = (p.title || "N/A").replace(/\|/g, "\\|").substring(0, 60);
+    table += `| ${i + 1} | ${shortUrl} | ${title} | ${p.wordCount} | ${p.h1.length} | ${p.h2.length} | ${p.h3.length} | ${p.imageCount} |\n`;
+  });
+  return table;
+}
+
+function formatHeadingsDetail(pages: ScrapedPage[]): string {
+  let detail = "";
+  pages.forEach((p, i) => {
+    if (p.h1.length === 0 && p.h2.length === 0 && p.h3.length === 0) return;
+    detail += `\n**Конкурент ${i + 1}** (${p.url}):\n`;
+    if (p.h1.length) detail += `- H1: ${p.h1.map(h => `"${h}"`).join(", ")}\n`;
+    if (p.h2.length) detail += `- H2 (${p.h2.length}): ${p.h2.slice(0, 15).map(h => `"${h}"`).join(", ")}${p.h2.length > 15 ? "..." : ""}\n`;
+    if (p.h3.length) detail += `- H3 (${p.h3.length}): ${p.h3.slice(0, 10).map(h => `"${h}"`).join(", ")}${p.h3.length > 10 ? "..." : ""}\n`;
+  });
+  return detail;
+}
 
 async function fetchSerpFromSeRanking(keyword: string, region: string, apiKey: string): Promise<any[] | null> {
   const engineId = ENGINE_IDS[region] || ENGINE_IDS.ua;
 
   try {
-    // 1. Create SERP task
     console.log(`Creating SERP task for "${keyword}" with engine_id ${engineId}`);
     const createRes = await fetch("https://api.seranking.com/v1/serp/tasks", {
       method: "POST",
@@ -24,55 +139,38 @@ async function fetchSerpFromSeRanking(keyword: string, region: string, apiKey: s
         "Authorization": `Token ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        engine_id: engineId,
-        query: [keyword],
-      }),
+      body: JSON.stringify({ engine_id: engineId, query: [keyword] }),
     });
 
     if (!createRes.ok) {
-      const errText = await createRes.text();
-      console.error("SE Ranking create task error:", createRes.status, errText);
+      console.error("SE Ranking create task error:", createRes.status, await createRes.text());
       return null;
     }
 
     const createData = await createRes.json();
-    console.log("SERP task created:", JSON.stringify(createData));
-
-    // Extract task_id from response
     const taskId = createData?.task_id || createData?.data?.task_id || createData?.id;
     if (!taskId) {
       console.error("No task_id in response:", JSON.stringify(createData));
       return null;
     }
 
-    // 2. Poll for results (max 90 seconds, every 5 seconds)
     const maxAttempts = 18;
     for (let i = 0; i < maxAttempts; i++) {
       await new Promise((r) => setTimeout(r, 5000));
-
       console.log(`Polling SERP task ${taskId}, attempt ${i + 1}/${maxAttempts}`);
-      const statusRes = await fetch(
-        `https://api.seranking.com/v1/serp/tasks/status?task_id=${taskId}`,
-        {
-          headers: { "Authorization": `Token ${apiKey}` },
-        }
-      );
 
-      if (!statusRes.ok) {
-        const errText = await statusRes.text();
-        console.error("SE Ranking status error:", statusRes.status, errText);
-        continue;
-      }
+      const statusRes = await fetch(`https://api.seranking.com/v1/serp/tasks/status?task_id=${taskId}`, {
+        headers: { "Authorization": `Token ${apiKey}` },
+      });
+
+      if (!statusRes.ok) continue;
 
       const statusData = await statusRes.json();
       const status = statusData?.status || statusData?.data?.status;
 
       if (status === "done" || status === "completed") {
-        // Extract results - top 10
         const results = statusData?.results || statusData?.data?.results || statusData?.data || [];
         const items = Array.isArray(results) ? results : (results?.items || results?.organic || []);
-        console.log(`SERP results received: ${items.length} items`);
         return items.slice(0, 10);
       }
 
@@ -90,19 +188,6 @@ async function fetchSerpFromSeRanking(keyword: string, region: string, apiKey: s
   }
 }
 
-function formatSerpTable(serpResults: any[]): string {
-  if (!serpResults || serpResults.length === 0) return "";
-
-  let table = "| № | URL | Title | Position |\n|---|-----|-------|----------|\n";
-  serpResults.forEach((item, i) => {
-    const url = item.url || item.link || "N/A";
-    const title = (item.title || "N/A").replace(/\|/g, "\\|");
-    const position = item.position || (i + 1);
-    table += `| ${i + 1} | ${url} | ${title} | ${position} |\n`;
-  });
-  return table;
-}
-
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -117,23 +202,32 @@ serve(async (req) => {
     const typeMap: Record<string, string> = { article: "інформаційна стаття", landing: "лендінг/посадкова сторінка", product: "картка товару", category: "сторінка категорії" };
     const regionMap: Record<string, string> = { ua: "Україна", us: "USA", eu: "Europe" };
 
-    // Fetch real SERP data if API key is available
-    let serpData: any[] | null = null;
-    let serpTable = "";
+    // 1. Fetch SERP data
+    let serpResults: any[] | null = null;
     if (SE_RANKING_API_KEY) {
-      console.log("Fetching real SERP data from SE Ranking...");
-      serpData = await fetchSerpFromSeRanking(keyword, region, SE_RANKING_API_KEY);
-      if (serpData && serpData.length > 0) {
-        serpTable = formatSerpTable(serpData);
-        console.log("Real SERP data formatted successfully");
-      } else {
-        console.log("No SERP data received, AI will generate synthetic data");
-      }
+      console.log("Fetching SERP data from SE Ranking...");
+      serpResults = await fetchSerpFromSeRanking(keyword, region, SE_RANKING_API_KEY);
     }
 
-    const serpSection = serpData && serpData.length > 0
-      ? `\n\nРЕАЛЬНІ ДАНІ SERP (ТОП-10 Google) для "${keyword}":\n${serpTable}\nВикористай ці реальні дані конкурентів у розділі 3.2. Проаналізуй їх URL, заголовки та позиції. Доповни таблицю додатковими колонками (кількість слів, H2, H3, зображення) на основі своїх знань.`
-      : `\nРеальних даних SERP немає. Вигадай реалістичні дані для 10 конкурентів у розділі 3.2.`;
+    // 2. Scrape competitor pages for real structure data
+    let scrapedPages: ScrapedPage[] = [];
+    let scrapedTable = "";
+    let headingsDetail = "";
+
+    if (serpResults && serpResults.length > 0) {
+      console.log(`Scraping ${serpResults.length} competitor pages...`);
+      scrapedPages = await scrapeCompetitors(serpResults);
+      scrapedTable = formatScrapedTable(scrapedPages);
+      headingsDetail = formatHeadingsDetail(scrapedPages);
+      console.log(`Successfully scraped ${scrapedPages.filter(p => p.wordCount > 0).length}/${scrapedPages.length} pages`);
+    }
+
+    // 3. Build SERP section for prompt
+    const serpSection = scrapedPages.length > 0
+      ? `\n\nРЕАЛЬНІ ДАНІ КОНКУРЕНТІВ (ТОП-10 Google) для "${keyword}":\n\nТаблиця конкурентів:\n${scrapedTable}\n\nДетальна структура заголовків конкурентів:\n${headingsDetail}\n\nВикористай ці РЕАЛЬНІ дані у розділах 3.2, 3.3, 3.5. Аналізуй реальну кількість слів, заголовків та зображень для рекомендацій.`
+      : serpResults && serpResults.length > 0
+        ? `\n\nДані SERP (URL та Title) для "${keyword}" отримано, але скрапінг сторінок не вдався. Доповни таблицю на основі своїх знань.`
+        : `\nРеальних даних SERP немає. Вигадай реалістичні дані для 10 конкурентів у розділі 3.2.`;
 
     const systemPrompt = `Ти — досвідчений SEO-стратег та контент-менеджер з 10+ років досвіду. Створюєш детальні технічні завдання (ТЗ) для копірайтерів, які виглядають як професійний документ.
 Відповідай ${langMap[language] || "українською мовою"}.
@@ -162,7 +256,7 @@ ${serpSection}
 Які дані потрібні для написання (ключове слово, регіон, мова, тип контенту тощо).
 
 ### 3.2 SERP-конкуренти (ТОП-10)
-${serpData && serpData.length > 0 ? "Використай надані РЕАЛЬНІ дані SERP та доповни таблицю:" : "Проаналізуй ТОП-10 видачі та створи таблицю:"}
+${scrapedPages.length > 0 ? "Використай надані РЕАЛЬНІ дані скрапінгу конкурентів:" : serpResults && serpResults.length > 0 ? "Використай надані дані SERP та доповни:" : "Проаналізуй ТОП-10 видачі та створи таблицю:"}
 | № | URL | Title | Кількість слів | H2 | H3 | Зображення |
 
 ### 3.3 Рекомендовані параметри тексту
@@ -175,7 +269,8 @@ ${serpData && serpData.length > 0 ? "Використай надані РЕАЛ�
 | Ключове слово | Частотність | Рекомендована кількість вживань |
 
 ### 3.5 Структура заголовків (H1-H3)
-Детальна рекомендована структура статті з усіма заголовками H1, H2, H3. Для кожного заголовка напиши короткий опис що має бути в розділі.
+${scrapedPages.length > 0 ? "На основі РЕАЛЬНИХ заголовків конкурентів створи оптимальну структуру:" : "Детальна рекомендована структура статті з усіма заголовками H1, H2, H3."}
+Для кожного заголовка напиши короткий опис що має бути в розділі.
 
 ### 3.6 Посилання
 Рекомендації щодо внутрішньої та зовнішньої перелінковки. Скільки посилань, якого типу, на які сторінки.
@@ -236,9 +331,10 @@ ${serpData && serpData.length > 0 ? "Використай надані РЕАЛ�
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || "Не вдалося згенерувати ТЗ.";
 
-    return new Response(JSON.stringify({ 
+    return new Response(JSON.stringify({
       content,
-      serpDataUsed: serpData !== null && serpData.length > 0,
+      serpDataUsed: serpResults !== null && serpResults.length > 0,
+      pagesScraped: scrapedPages.filter(p => p.wordCount > 0).length,
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
