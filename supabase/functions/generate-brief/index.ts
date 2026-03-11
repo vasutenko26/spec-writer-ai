@@ -148,7 +148,9 @@ async function fetchSerpFromSeRanking(keyword: string, region: string, apiKey: s
     }
 
     const createData = await createRes.json();
-    const taskId = createData?.task_id || createData?.data?.task_id || createData?.id;
+    // Response can be an array like [{query, task_id}] or an object
+    const firstItem = Array.isArray(createData) ? createData[0] : createData;
+    const taskId = firstItem?.task_id || firstItem?.data?.task_id || firstItem?.id;
     if (!taskId) {
       console.error("No task_id in response:", JSON.stringify(createData));
       return null;
