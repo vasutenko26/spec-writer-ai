@@ -315,6 +315,8 @@ ${scrapedPages.length > 0 ? "На основі РЕАЛЬНИХ заголовк
 
     if (!response.ok) {
       const status = response.status;
+      const t = await response.text();
+      console.error("AI gateway error:", status, t);
       if (status === 429) {
         return new Response(JSON.stringify({ error: "Перевищено ліміт запитів. Спробуйте пізніше." }), {
           status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -325,12 +327,18 @@ ${scrapedPages.length > 0 ? "На основі РЕАЛЬНИХ заголовк
           status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const t = await response.text();
-      console.error("AI gateway error:", status, t);
       throw new Error(`AI gateway error: ${status}`);
     }
 
-    const data = await response.json();
+    const responseText = await response.text();
+    if (!responseText) throw new Error("Empty response from AI gateway");
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      console.error("Failed to parse AI response:", responseText.substring(0, 500));
+      throw new Error("Invalid JSON from AI gateway");
+    }
     const content = data.choices?.[0]?.message?.content || "Не вдалося згенерувати ТЗ.";
 
     return new Response(JSON.stringify({
