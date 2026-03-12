@@ -114,7 +114,11 @@ th{background:#f5f5f5}ul,ol{padding-left:1.5em}</style></head><body>${content}</
           </Button>
           <Button variant="outline" size="sm" onClick={handleExport} className="text-xs">
             <Download className="mr-1 h-3.5 w-3.5" />
-            Експорт .md
+            .md
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportZip} className="text-xs">
+            <Archive className="mr-1 h-3.5 w-3.5" />
+            .zip
           </Button>
         </div>
       </div>
