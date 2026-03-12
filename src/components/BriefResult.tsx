@@ -47,6 +47,24 @@ const BriefResult = ({ content }: { content: string }) => {
     URL.revokeObjectURL(url);
   };
 
+  const handleExportZip = async () => {
+    const zip = new JSZip();
+    zip.file("technical-brief.md", content);
+
+    // Convert markdown to simple HTML for convenience
+    const htmlContent = `<!DOCTYPE html>
+<html lang="uk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Технічне завдання</title>
+<style>body{font-family:system-ui,sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem;line-height:1.6;color:#1a1a1a}
+h1,h2,h3{margin-top:1.5em}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}
+th{background:#f5f5f5}ul,ol{padding-left:1.5em}</style></head><body>${content}</body></html>`;
+    zip.file("technical-brief.html", htmlContent);
+    zip.file("technical-brief.txt", content.replace(/[#*`|_\-\[\]]/g, ""));
+
+    const blob = await zip.generateAsync({ type: "blob" });
+    saveAs(blob, "technical-brief.zip");
+  };
+
   const scrollToSection = (id: string) => {
     const el = document.getElementById(id);
     if (el) {
