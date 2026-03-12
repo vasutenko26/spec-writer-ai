@@ -1,0 +1,2009 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ContentForge — Полный исходный код проекта</title>
+<style>
+  body { font-family: 'Segoe UI', system-ui, sans-serif; max-width: 960px; margin: 0 auto; padding: 2rem 1rem; line-height: 1.7; color: #1a1a2e; background: #fafafa; }
+  h1 { font-size: 2rem; border-bottom: 3px solid #0d9668; padding-bottom: 0.5rem; }
+  h2 { font-size: 1.4rem; margin-top: 2.5rem; color: #0d9668; border-left: 4px solid #0d9668; padding-left: 12px; }
+  h3 { font-size: 1.1rem; margin-top: 1.5rem; color: #333; }
+  pre { background: #1e1e2e; color: #cdd6f4; padding: 1rem; border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.5; }
+  code { font-family: 'Fira Code', 'Consolas', monospace; }
+  p code { background: #e8e8e8; padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+  hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+  .tree { background: #f0f0f0; padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 13px; white-space: pre; overflow-x: auto; }
+  .note { background: #fff3cd; border-left: 4px solid #ffc107; padding: 0.75rem 1rem; margin: 1rem 0; border-radius: 4px; font-style: italic; }
+  ul { padding-left: 1.5em; }
+  table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+  th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+  th { background: #f5f5f5; }
+</style>
+</head>
+<body>
+
+<h1>ContentForge — Полный исходный код проекта</h1>
+
+<h2>Структура проекта</h2>
+<div class="tree">├── index.html
+├── package.json
+├── vite.config.ts
+├── vitest.config.ts
+├── tailwind.config.ts
+├── tsconfig.json
+├── tsconfig.app.json
+├── tsconfig.node.json
+├── postcss.config.js
+├── eslint.config.js
+├── components.json
+├── README.md
+├── public/
+│   ├── favicon.ico
+│   ├── placeholder.svg
+│   └── robots.txt
+├── src/
+│   ├── main.tsx
+│   ├── App.tsx
+│   ├── App.css
+│   ├── index.css
+│   ├── vite-env.d.ts
+│   ├── components/
+│   │   ├── BriefForm.tsx
+│   │   ├── BriefResult.tsx
+│   │   ├── ContentForm.tsx
+│   │   ├── NavLink.tsx
+│   │   └── ui/ (shadcn компоненты)
+│   ├── hooks/
+│   │   ├── use-mobile.tsx
+│   │   └── use-toast.ts
+│   ├── integrations/supabase/
+│   │   ├── client.ts
+│   │   └── types.ts
+│   ├── lib/
+│   │   └── utils.ts
+│   ├── pages/
+│   │   ├── Index.tsx
+│   │   ├── Dashboard.tsx
+│   │   ├── LandingPage.tsx
+│   │   └── NotFound.tsx
+│   └── test/
+│       ├── setup.ts
+│       └── example.test.ts
+└── supabase/
+    ├── config.toml
+    └── functions/
+        ├── generate-brief/index.ts
+        └── generate-content/index.ts</div>
+
+<hr>
+
+<h2>index.html</h2>
+<pre><code>&lt;!doctype html&gt;
+&lt;html lang="en"&gt;
+  &lt;head&gt;
+    &lt;meta charset="UTF-8" /&gt;
+    &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+    &lt;title&gt;Lovable App&lt;/title&gt;
+    &lt;meta name="description" content="Lovable Generated Project"&gt;
+    &lt;meta name="author" content="Lovable" /&gt;
+    &lt;meta property="og:type" content="website" /&gt;
+    &lt;meta property="og:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/042284ab-d783-4388-a5b5-83b087a1e100/id-preview-d67450c1--ed38ba06-dec1-43c8-a223-897f2d8b664a.lovable.app-1773143627111.png"&gt;
+    &lt;meta name="twitter:card" content="summary_large_image" /&gt;
+    &lt;meta name="twitter:site" content="@Lovable" /&gt;
+    &lt;meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/042284ab-d783-4388-a5b5-83b087a1e100/id-preview-d67450c1--ed38ba06-dec1-43c8-a223-897f2d8b664a.lovable.app-1773143627111.png"&gt;
+    &lt;meta property="og:title" content="Lovable App"&gt;
+    &lt;meta name="twitter:title" content="Lovable App"&gt;
+    &lt;meta property="og:description" content="Lovable Generated Project"&gt;
+    &lt;meta name="twitter:description" content="Lovable Generated Project"&gt;
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;div id="root"&gt;&lt;/div&gt;
+    &lt;script type="module" src="/src/main.tsx"&gt;&lt;/script&gt;
+  &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+<hr>
+
+<h2>package.json</h2>
+<pre><code>{
+  "name": "vite_react_shadcn_ts",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:dev": "vite build --mode development",
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.10.0",
+    "@radix-ui/react-accordion": "^1.2.11",
+    "@radix-ui/react-alert-dialog": "^1.1.14",
+    "@radix-ui/react-aspect-ratio": "^1.1.7",
+    "@radix-ui/react-avatar": "^1.1.10",
+    "@radix-ui/react-checkbox": "^1.3.2",
+    "@radix-ui/react-collapsible": "^1.1.11",
+    "@radix-ui/react-context-menu": "^2.2.15",
+    "@radix-ui/react-dialog": "^1.1.14",
+    "@radix-ui/react-dropdown-menu": "^2.1.15",
+    "@radix-ui/react-hover-card": "^1.1.14",
+    "@radix-ui/react-label": "^2.1.7",
+    "@radix-ui/react-menubar": "^1.1.15",
+    "@radix-ui/react-navigation-menu": "^1.2.13",
+    "@radix-ui/react-popover": "^1.1.14",
+    "@radix-ui/react-progress": "^1.1.7",
+    "@radix-ui/react-radio-group": "^1.3.7",
+    "@radix-ui/react-scroll-area": "^1.2.9",
+    "@radix-ui/react-select": "^2.2.5",
+    "@radix-ui/react-separator": "^1.1.7",
+    "@radix-ui/react-slider": "^1.3.5",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-switch": "^1.2.5",
+    "@radix-ui/react-tabs": "^1.1.12",
+    "@radix-ui/react-toast": "^1.2.14",
+    "@radix-ui/react-toggle": "^1.1.9",
+    "@radix-ui/react-toggle-group": "^1.1.10",
+    "@radix-ui/react-tooltip": "^1.2.7",
+    "@supabase/supabase-js": "^2.98.0",
+    "@tanstack/react-query": "^5.83.0",
+    "@types/file-saver": "^2.0.7",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "date-fns": "^3.6.0",
+    "embla-carousel-react": "^8.6.0",
+    "file-saver": "^2.0.5",
+    "input-otp": "^1.4.2",
+    "jszip": "^3.10.1",
+    "lucide-react": "^0.462.0",
+    "next-themes": "^0.3.0",
+    "react": "^18.3.1",
+    "react-day-picker": "^8.10.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.61.1",
+    "react-markdown": "^10.1.0",
+    "react-resizable-panels": "^2.1.9",
+    "react-router-dom": "^6.30.1",
+    "recharts": "^2.15.4",
+    "sonner": "^1.7.4",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7",
+    "vaul": "^0.9.9",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.32.0",
+    "@tailwindcss/typography": "^0.5.19",
+    "@testing-library/jest-dom": "^6.6.0",
+    "@testing-library/react": "^16.0.0",
+    "@types/node": "^22.16.5",
+    "@types/react": "^18.3.23",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react-swc": "^3.11.0",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^9.32.0",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^15.15.0",
+    "jsdom": "^20.0.3",
+    "lovable-tagger": "^1.1.13",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.38.0",
+    "vite": "^5.4.19",
+    "vitest": "^3.2.4"
+  }
+}</code></pre>
+
+<hr>
+
+<h2>vite.config.ts</h2>
+<pre><code>import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react-swc";
+import path from "path";
+import { componentTagger } from "lovable-tagger";
+
+export default defineConfig(({ mode }) =&gt; ({
+  server: {
+    host: "::",
+    port: 8080,
+    hmr: {
+      overlay: false,
+    },
+  },
+  plugins: [react(), mode === "development" &amp;&amp; componentTagger()].filter(Boolean),
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+  },
+}));</code></pre>
+
+<hr>
+
+<h2>vitest.config.ts</h2>
+<pre><code>import { defineConfig } from "vitest/config";
+import react from "@vitejs/plugin-react-swc";
+import path from "path";
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: "jsdom",
+    globals: true,
+    setupFiles: ["./src/test/setup.ts"],
+    include: ["src/**/*.{test,spec}.{ts,tsx}"],
+  },
+  resolve: {
+    alias: { "@": path.resolve(__dirname, "./src") },
+  },
+});</code></pre>
+
+<hr>
+
+<h2>tailwind.config.ts</h2>
+<pre><code>import type { Config } from "tailwindcss";
+
+export default {
+  darkMode: ["class"],
+  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  prefix: "",
+  theme: {
+    container: {
+      center: true,
+      padding: "2rem",
+      screens: {
+        "2xl": "1400px",
+      },
+    },
+    extend: {
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
+      },
+      colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive))",
+          foreground: "hsl(var(--destructive-foreground))",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        sidebar: {
+          DEFAULT: "hsl(var(--sidebar-background))",
+          foreground: "hsl(var(--sidebar-foreground))",
+          primary: "hsl(var(--sidebar-primary))",
+          "primary-foreground": "hsl(var(--sidebar-primary-foreground))",
+          accent: "hsl(var(--sidebar-accent))",
+          "accent-foreground": "hsl(var(--sidebar-accent-foreground))",
+          border: "hsl(var(--sidebar-border))",
+          ring: "hsl(var(--sidebar-ring))",
+        },
+      },
+      borderRadius: {
+        lg: "var(--radius)",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
+      },
+      keyframes: {
+        "accordion-down": {
+          from: { height: "0" },
+          to: { height: "var(--radix-accordion-content-height)" },
+        },
+        "accordion-up": {
+          from: { height: "var(--radix-accordion-content-height)" },
+          to: { height: "0" },
+        },
+        "fade-in": {
+          from: { opacity: "0", transform: "translateY(10px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
+        },
+      },
+      animation: {
+        "accordion-down": "accordion-down 0.2s ease-out",
+        "accordion-up": "accordion-up 0.2s ease-out",
+        "fade-in": "fade-in 0.5s ease-out forwards",
+      },
+    },
+  },
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
+} satisfies Config;</code></pre>
+
+<hr>
+
+<h2>tsconfig.json</h2>
+<pre><code>{
+  "compilerOptions": {
+    "allowJs": true,
+    "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "skipLibCheck": true,
+    "strictNullChecks": false
+  },
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}</code></pre>
+
+<hr>
+
+<h2>tsconfig.app.json</h2>
+<pre><code>{
+  "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleDetection": "force",
+    "moduleResolution": "bundler",
+    "noEmit": true,
+    "noFallthroughCasesInSwitch": false,
+    "noImplicitAny": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "skipLibCheck": true,
+    "strict": false,
+    "target": "ES2020",
+    "types": ["vitest/globals"],
+    "useDefineForClassFields": true
+  },
+  "include": ["src"]
+}</code></pre>
+
+<hr>
+
+<h2>tsconfig.node.json</h2>
+<pre><code>{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "strict": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["vite.config.ts"]
+}</code></pre>
+
+<hr>
+
+<h2>postcss.config.js</h2>
+<pre><code>export default {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+};</code></pre>
+
+<hr>
+
+<h2>eslint.config.js</h2>
+<pre><code>import js from "@eslint/js";
+import globals from "globals";
+import reactHooks from "eslint-plugin-react-hooks";
+import reactRefresh from "eslint-plugin-react-refresh";
+import tseslint from "typescript-eslint";
+
+export default tseslint.config(
+  { ignores: ["dist"] },
+  {
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
+    files: ["**/*.{ts,tsx}"],
+    languageOptions: {
+      ecmaVersion: 2020,
+      globals: globals.browser,
+    },
+    plugins: {
+      "react-hooks": reactHooks,
+      "react-refresh": reactRefresh,
+    },
+    rules: {
+      ...reactHooks.configs.recommended.rules,
+      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
+);</code></pre>
+
+<hr>
+
+<h2>components.json</h2>
+<pre><code>{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "default",
+  "rsc": false,
+  "tsx": true,
+  "tailwind": {
+    "config": "tailwind.config.ts",
+    "css": "src/index.css",
+    "baseColor": "slate",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@/components",
+    "utils": "@/lib/utils",
+    "ui": "@/components/ui",
+    "lib": "@/lib",
+    "hooks": "@/hooks"
+  }
+}</code></pre>
+
+<hr>
+
+<h2>src/main.tsx</h2>
+<pre><code>import { createRoot } from "react-dom/client";
+import App from "./App.tsx";
+import "./index.css";
+
+createRoot(document.getElementById("root")!).render(&lt;App /&gt;);</code></pre>
+
+<hr>
+
+<h2>src/App.tsx</h2>
+<pre><code>import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import LandingPage from "./pages/LandingPage";
+import Dashboard from "./pages/Dashboard";
+import NotFound from "./pages/NotFound";
+
+const queryClient = new QueryClient();
+
+const App = () =&gt; (
+  &lt;QueryClientProvider client={queryClient}&gt;
+    &lt;TooltipProvider&gt;
+      &lt;Toaster /&gt;
+      &lt;Sonner /&gt;
+      &lt;BrowserRouter&gt;
+        &lt;Routes&gt;
+          &lt;Route path="/" element={&lt;LandingPage /&gt;} /&gt;
+          &lt;Route path="/dashboard" element={&lt;Dashboard /&gt;} /&gt;
+          &lt;Route path="*" element={&lt;NotFound /&gt;} /&gt;
+        &lt;/Routes&gt;
+      &lt;/BrowserRouter&gt;
+    &lt;/TooltipProvider&gt;
+  &lt;/QueryClientProvider&gt;
+);
+
+export default App;</code></pre>
+
+<hr>
+
+<h2>src/index.css</h2>
+<pre><code>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 220 20% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 20% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 10%;
+    --primary: 160 84% 39%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 14% 96%;
+    --secondary-foreground: 220 20% 10%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 10% 46%;
+    --accent: 160 84% 39%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 160 84% 39%;
+    --radius: 0.75rem;
+    --sidebar-background: 220 20% 10%;
+    --sidebar-foreground: 220 14% 96%;
+    --sidebar-primary: 160 84% 39%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 18%;
+    --sidebar-accent-foreground: 220 14% 96%;
+    --sidebar-border: 220 15% 20%;
+    --sidebar-ring: 160 84% 39%;
+    --hero-gradient: linear-gradient(135deg, hsl(160 84% 39%), hsl(180 70% 35%));
+    --surface-elevated: 0 0% 100%;
+    --surface-sunken: 220 14% 96%;
+  }
+
+  .dark {
+    --background: 220 20% 7%;
+    --foreground: 220 14% 96%;
+    --card: 220 20% 10%;
+    --card-foreground: 220 14% 96%;
+    --popover: 220 20% 10%;
+    --popover-foreground: 220 14% 96%;
+    --primary: 160 84% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 15% 18%;
+    --secondary-foreground: 220 14% 96%;
+    --muted: 220 15% 18%;
+    --muted-foreground: 220 10% 55%;
+    --accent: 220 15% 18%;
+    --accent-foreground: 220 14% 96%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 15% 20%;
+    --input: 220 15% 20%;
+    --ring: 160 84% 45%;
+    --sidebar-background: 220 20% 5%;
+    --sidebar-foreground: 220 14% 96%;
+    --sidebar-primary: 160 84% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 220 15% 12%;
+    --sidebar-accent-foreground: 220 14% 96%;
+    --sidebar-border: 220 15% 15%;
+    --sidebar-ring: 160 84% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--hero-gradient);
+  }
+  .bg-hero-gradient {
+    background-image: var(--hero-gradient);
+  }
+}</code></pre>
+
+<hr>
+
+<h2>src/App.css</h2>
+<pre><code>#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card { padding: 2em; }
+.read-the-docs { color: #888; }</code></pre>
+
+<hr>
+
+<h2>src/vite-env.d.ts</h2>
+<pre><code>/// &lt;reference types="vite/client" /&gt;</code></pre>
+
+<hr>
+
+<h2>src/lib/utils.ts</h2>
+<pre><code>import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}</code></pre>
+
+<hr>
+
+<h2>src/pages/LandingPage.tsx</h2>
+<pre><code>import { FileText, Sparkles, Search, BarChart3, Globe, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+
+const features = [
+  {
+    icon: Search,
+    title: "SERP-аналіз конкурентів",
+    description: "Збір ТОП-10 конкурентів, аналіз структури, ключових слів та мета-даних",
+  },
+  {
+    icon: FileText,
+    title: "Генерація ТЗ (Brief)",
+    description: "Автоматичне формування технічного завдання для копірайтера з усіма параметрами",
+  },
+  {
+    icon: Sparkles,
+    title: "AI-генерація контенту",
+    description: "Створення тексту за ТЗ через AI з урахуванням SEO-вимог та структури",
+  },
+  {
+    icon: BarChart3,
+    title: "SEO-перевірки",
+    description: "Аналіз якості, читабельності, унікальності та відповідності SEO-метрикам",
+  },
+  {
+    icon: Globe,
+    title: "Автопублікація",
+    description: "Публікація готового контенту в WordPress або Shopify одним кліком",
+  },
+];
+
+const LandingPage = () =&gt; {
+  const navigate = useNavigate();
+
+  return (
+    &lt;div className="min-h-screen bg-background"&gt;
+      {/* Header */}
+      &lt;header className="border-b border-border bg-card"&gt;
+        &lt;div className="container flex items-center justify-between py-4"&gt;
+          &lt;div className="flex items-center gap-2"&gt;
+            &lt;div className="flex h-9 w-9 items-center justify-center rounded-lg bg-hero-gradient"&gt;
+              &lt;FileText className="h-5 w-5 text-primary-foreground" /&gt;
+            &lt;/div&gt;
+            &lt;span className="text-xl font-bold tracking-tight"&gt;ContentForge&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;Button onClick={() =&gt; navigate("/dashboard")} className="bg-hero-gradient border-0 text-primary-foreground hover:opacity-90"&gt;
+            Почати роботу
+            &lt;ArrowRight className="ml-2 h-4 w-4" /&gt;
+          &lt;/Button&gt;
+        &lt;/div&gt;
+      &lt;/header&gt;
+
+      {/* Hero */}
+      &lt;section className="container py-24 text-center"&gt;
+        &lt;div className="mx-auto max-w-3xl animate-fade-in"&gt;
+          &lt;div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-1.5 text-sm text-muted-foreground"&gt;
+            &lt;Sparkles className="h-4 w-4 text-primary" /&gt;
+            Сервіс автоконтенту на базі AI
+          &lt;/div&gt;
+          &lt;h1 className="mb-6 text-5xl font-extrabold leading-tight tracking-tight md:text-6xl"&gt;
+            Від ключового слова
+            &lt;br /&gt;
+            до &lt;span className="text-gradient"&gt;готової публікації&lt;/span&gt;
+          &lt;/h1&gt;
+          &lt;p className="mb-10 text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto"&gt;
+            Створюйте технічні завдання, генеруйте SEO-оптимізований контент та публікуйте його автоматично — все в одному сервісі.
+          &lt;/p&gt;
+          &lt;div className="flex items-center justify-center gap-4"&gt;
+            &lt;Button size="lg" onClick={() =&gt; navigate("/dashboard")} className="bg-hero-gradient border-0 text-primary-foreground hover:opacity-90 text-base px-8 py-6"&gt;
+              Створити ТЗ
+              &lt;ArrowRight className="ml-2 h-5 w-5" /&gt;
+            &lt;/Button&gt;
+            &lt;Button size="lg" variant="outline" onClick={() =&gt; navigate("/dashboard")} className="text-base px-8 py-6"&gt;
+              Генерувати контент
+            &lt;/Button&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/section&gt;
+
+      {/* Features */}
+      &lt;section className="container pb-24"&gt;
+        &lt;div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"&gt;
+          {features.map((feature, i) =&gt; (
+            &lt;div
+              key={feature.title}
+              className="group rounded-xl border border-border bg-card p-6 transition-all hover:shadow-lg hover:border-primary/30"
+              style={{ animationDelay: `${i * 100}ms` }}
+            &gt;
+              &lt;div className="mb-4 flex h-11 w-11 items-center justify-center rounded-lg bg-primary/10"&gt;
+                &lt;feature.icon className="h-5 w-5 text-primary" /&gt;
+              &lt;/div&gt;
+              &lt;h3 className="mb-2 text-lg font-semibold"&gt;{feature.title}&lt;/h3&gt;
+              &lt;p className="text-sm text-muted-foreground leading-relaxed"&gt;{feature.description}&lt;/p&gt;
+            &lt;/div&gt;
+          ))}
+        &lt;/div&gt;
+      &lt;/section&gt;
+
+      {/* Footer */}
+      &lt;footer className="border-t border-border bg-card py-8"&gt;
+        &lt;div className="container text-center text-sm text-muted-foreground"&gt;
+          © 2026 ContentForge. Сервіс автоматизації контенту.
+        &lt;/div&gt;
+      &lt;/footer&gt;
+    &lt;/div&gt;
+  );
+};
+
+export default LandingPage;</code></pre>
+
+<hr>
+
+<h2>src/pages/Dashboard.tsx</h2>
+<pre><code>import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FileText, Sparkles } from "lucide-react";
+import BriefForm from "@/components/BriefForm";
+import ContentForm from "@/components/ContentForm";
+import { useNavigate } from "react-router-dom";
+
+const Dashboard = () =&gt; {
+  const navigate = useNavigate();
+
+  return (
+    &lt;div className="min-h-screen bg-background"&gt;
+      {/* Header */}
+      &lt;header className="border-b border-border bg-card sticky top-0 z-50"&gt;
+        &lt;div className="container flex items-center justify-between py-3"&gt;
+          &lt;button onClick={() =&gt; navigate("/")} className="flex items-center gap-2 hover:opacity-80 transition-opacity"&gt;
+            &lt;div className="flex h-8 w-8 items-center justify-center rounded-lg bg-hero-gradient"&gt;
+              &lt;FileText className="h-4 w-4 text-primary-foreground" /&gt;
+            &lt;/div&gt;
+            &lt;span className="text-lg font-bold tracking-tight"&gt;ContentForge&lt;/span&gt;
+          &lt;/button&gt;
+        &lt;/div&gt;
+      &lt;/header&gt;
+
+      &lt;div className="container py-8 max-w-4xl"&gt;
+        &lt;Tabs defaultValue="brief" className="w-full"&gt;
+          &lt;TabsList className="grid w-full grid-cols-2 mb-8"&gt;
+            &lt;TabsTrigger value="brief" className="flex items-center gap-2 text-sm"&gt;
+              &lt;FileText className="h-4 w-4" /&gt;
+              Створити ТЗ (Brief)
+            &lt;/TabsTrigger&gt;
+            &lt;TabsTrigger value="content" className="flex items-center gap-2 text-sm"&gt;
+              &lt;Sparkles className="h-4 w-4" /&gt;
+              Генерація контенту
+            &lt;/TabsTrigger&gt;
+          &lt;/TabsList&gt;
+
+          &lt;TabsContent value="brief"&gt;
+            &lt;BriefForm /&gt;
+          &lt;/TabsContent&gt;
+
+          &lt;TabsContent value="content"&gt;
+            &lt;ContentForm /&gt;
+          &lt;/TabsContent&gt;
+        &lt;/Tabs&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};
+
+export default Dashboard;</code></pre>
+
+<hr>
+
+<h2>src/pages/Index.tsx</h2>
+<pre><code>const Index = () =&gt; {
+  return (
+    &lt;div className="flex min-h-screen items-center justify-center bg-background"&gt;
+      &lt;div className="text-center"&gt;
+        &lt;h1 className="mb-4 text-4xl font-bold"&gt;Welcome to Your Blank App&lt;/h1&gt;
+        &lt;p className="text-xl text-muted-foreground"&gt;Start building your amazing project here!&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};
+
+export default Index;</code></pre>
+
+<hr>
+
+<h2>src/pages/NotFound.tsx</h2>
+<pre><code>import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+
+const NotFound = () =&gt; {
+  const location = useLocation();
+
+  useEffect(() =&gt; {
+    console.error("404 Error: User attempted to access non-existent route:", location.pathname);
+  }, [location.pathname]);
+
+  return (
+    &lt;div className="flex min-h-screen items-center justify-center bg-muted"&gt;
+      &lt;div className="text-center"&gt;
+        &lt;h1 className="mb-4 text-4xl font-bold"&gt;404&lt;/h1&gt;
+        &lt;p className="mb-4 text-xl text-muted-foreground"&gt;Oops! Page not found&lt;/p&gt;
+        &lt;a href="/" className="text-primary underline hover:text-primary/90"&gt;
+          Return to Home
+        &lt;/a&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};
+
+export default NotFound;</code></pre>
+
+<hr>
+
+<h2>src/components/BriefForm.tsx</h2>
+<pre><code>import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Search, FileText, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import BriefResult from "./BriefResult";
+
+const BriefForm = () =&gt; {
+  const [keyword, setKeyword] = useState("");
+  const [language, setLanguage] = useState("uk");
+  const [region, setRegion] = useState("ua");
+  const [contentType, setContentType] = useState("article");
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState&lt;string | null&gt;(null);
+
+  const handleGenerate = async () =&gt; {
+    if (!keyword.trim()) return;
+    setIsLoading(true);
+    setResult(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-brief", {
+        body: { keyword, language, region, contentType },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setResult(data.content);
+    } catch (e: any) {
+      console.error("Brief generation error:", e);
+      toast.error(e.message || "Помилка генерації ТЗ");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
+  return (
+    &lt;div className="space-y-6"&gt;
+      &lt;Card&gt;
+        &lt;CardHeader&gt;
+          &lt;CardTitle className="flex items-center gap-2"&gt;
+            &lt;Search className="h-5 w-5 text-primary" /&gt;
+            Параметри для аналізу
+          &lt;/CardTitle&gt;
+          &lt;CardDescription&gt;
+            Введіть ключове слово та параметри для створення ТЗ на основі AI-аналізу
+          &lt;/CardDescription&gt;
+        &lt;/CardHeader&gt;
+        &lt;CardContent className="space-y-4"&gt;
+          &lt;div className="space-y-2"&gt;
+            &lt;Label htmlFor="keyword"&gt;Ключове слово / тема&lt;/Label&gt;
+            &lt;Input
+              id="keyword"
+              placeholder="Наприклад: як вибрати ноутбук для роботи"
+              value={keyword}
+              onChange={(e) =&gt; setKeyword(e.target.value)}
+            /&gt;
+          &lt;/div&gt;
+
+          &lt;div className="grid grid-cols-1 md:grid-cols-3 gap-4"&gt;
+            &lt;div className="space-y-2"&gt;
+              &lt;Label&gt;Мова контенту&lt;/Label&gt;
+              &lt;Select value={language} onValueChange={setLanguage}&gt;
+                &lt;SelectTrigger&gt;&lt;SelectValue /&gt;&lt;/SelectTrigger&gt;
+                &lt;SelectContent&gt;
+                  &lt;SelectItem value="uk"&gt;Українська&lt;/SelectItem&gt;
+                  &lt;SelectItem value="ru"&gt;Русский&lt;/SelectItem&gt;
+                  &lt;SelectItem value="en"&gt;English&lt;/SelectItem&gt;
+                &lt;/SelectContent&gt;
+              &lt;/Select&gt;
+            &lt;/div&gt;
+
+            &lt;div className="space-y-2"&gt;
+              &lt;Label&gt;Регіон&lt;/Label&gt;
+              &lt;Select value={region} onValueChange={setRegion}&gt;
+                &lt;SelectTrigger&gt;&lt;SelectValue /&gt;&lt;/SelectTrigger&gt;
+                &lt;SelectContent&gt;
+                  &lt;SelectItem value="ua"&gt;Україна&lt;/SelectItem&gt;
+                  &lt;SelectItem value="us"&gt;США&lt;/SelectItem&gt;
+                  &lt;SelectItem value="eu"&gt;Європа&lt;/SelectItem&gt;
+                &lt;/SelectContent&gt;
+              &lt;/Select&gt;
+            &lt;/div&gt;
+
+            &lt;div className="space-y-2"&gt;
+              &lt;Label&gt;Тип контенту&lt;/Label&gt;
+              &lt;Select value={contentType} onValueChange={setContentType}&gt;
+                &lt;SelectTrigger&gt;&lt;SelectValue /&gt;&lt;/SelectTrigger&gt;
+                &lt;SelectContent&gt;
+                  &lt;SelectItem value="article"&gt;Стаття&lt;/SelectItem&gt;
+                  &lt;SelectItem value="landing"&gt;Лендінг&lt;/SelectItem&gt;
+                  &lt;SelectItem value="product"&gt;Картка товару&lt;/SelectItem&gt;
+                  &lt;SelectItem value="category"&gt;Категорія&lt;/SelectItem&gt;
+                &lt;/SelectContent&gt;
+              &lt;/Select&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;Button
+            onClick={handleGenerate}
+            disabled={!keyword.trim() || isLoading}
+            className="w-full bg-hero-gradient border-0 text-primary-foreground hover:opacity-90"
+          &gt;
+            {isLoading ? (
+              &lt;&gt;&lt;Loader2 className="mr-2 h-4 w-4 animate-spin" /&gt; AI аналізує та створює ТЗ...&lt;/&gt;
+            ) : (
+              &lt;&gt;&lt;FileText className="mr-2 h-4 w-4" /&gt; Створити ТЗ&lt;/&gt;
+            )}
+          &lt;/Button&gt;
+        &lt;/CardContent&gt;
+      &lt;/Card&gt;
+
+      {result &amp;&amp; &lt;BriefResult content={result} /&gt;}
+    &lt;/div&gt;
+  );
+};
+
+export default BriefForm;</code></pre>
+
+<hr>
+
+<h2>src/components/BriefResult.tsx</h2>
+<pre><code>import { useState, useEffect, useMemo } from "react";
+import ReactMarkdown from "react-markdown";
+import { Button } from "@/components/ui/button";
+import { Download, Copy, Check, List, X, Archive } from "lucide-react";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
+
+interface TocItem {
+  id: string;
+  text: string;
+  level: number;
+}
+
+const BriefResult = ({ content }: { content: string }) =&gt; {
+  const [copied, setCopied] = useState(false);
+  const [showToc, setShowToc] = useState(true);
+  const [activeId, setActiveId] = useState("");
+
+  const toc = useMemo(() =&gt; {
+    const items: TocItem[] = [];
+    const lines = content.split("\n");
+    for (const line of lines) {
+      const match = line.match(/^(#{2,4})\s+(.+)/);
+      if (match) {
+        const level = match[1].length;
+        const text = match[2].trim();
+        const id = text.toLowerCase().replace(/[^\wа-яіїєґ\d]+/gi, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+        items.push({ id, text, level });
+      }
+    }
+    return items;
+  }, [content]);
+
+  const handleCopy = () =&gt; {
+    navigator.clipboard.writeText(content);
+    setCopied(true);
+    setTimeout(() =&gt; setCopied(false), 2000);
+  };
+
+  const handleExport = () =&gt; {
+    const blob = new Blob([content], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "technical-brief.md";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportZip = async () =&gt; {
+    const zip = new JSZip();
+    zip.file("technical-brief.md", content);
+
+    const htmlContent = `&lt;!DOCTYPE html&gt;
+&lt;html lang="uk"&gt;&lt;head&gt;&lt;meta charset="UTF-8"&gt;&lt;meta name="viewport" content="width=device-width,initial-scale=1.0"&gt;
+&lt;title&gt;Технічне завдання&lt;/title&gt;
+&lt;style&gt;body{font-family:system-ui,sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem;line-height:1.6;color:#1a1a1a}
+h1,h2,h3{margin-top:1.5em}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}
+th{background:#f5f5f5}ul,ol{padding-left:1.5em}&lt;/style&gt;&lt;/head&gt;&lt;body&gt;${content}&lt;/body&gt;&lt;/html&gt;`;
+    zip.file("technical-brief.html", htmlContent);
+    zip.file("technical-brief.txt", content.replace(/[#*\`|_\-\[\]]/g, ""));
+
+    const blob = await zip.generateAsync({ type: "blob" });
+    saveAs(blob, "technical-brief.zip");
+  };
+
+  const scrollToSection = (id: string) =&gt; {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+      setActiveId(id);
+    }
+  };
+
+  useEffect(() =&gt; {
+    const observer = new IntersectionObserver(
+      (entries) =&gt; {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id);
+            break;
+          }
+        }
+      },
+      { rootMargin: "-80px 0px -60% 0px" }
+    );
+
+    toc.forEach(({ id }) =&gt; {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () =&gt; observer.disconnect();
+  }, [toc]);
+
+  const generateHeadingId = (text: string) =&gt;
+    text.toLowerCase().replace(/[^\wа-яіїєґ\d]+/gi, "-").replace(/-+/g, "-").replace(/^-|-$/g, "");
+
+  return (
+    &lt;div className="animate-fade-in"&gt;
+      {/* Toolbar */}
+      &lt;div className="flex items-center justify-between mb-4 rounded-lg border border-border bg-card p-3"&gt;
+        &lt;div className="flex items-center gap-2"&gt;
+          &lt;Button variant="ghost" size="sm" onClick={() =&gt; setShowToc(!showToc)} className="text-xs"&gt;
+            {showToc ? &lt;X className="mr-1 h-3.5 w-3.5" /&gt; : &lt;List className="mr-1 h-3.5 w-3.5" /&gt;}
+            {showToc ? "Сховати зміст" : "Зміст"}
+          &lt;/Button&gt;
+        &lt;/div&gt;
+        &lt;div className="flex items-center gap-2"&gt;
+          &lt;Button variant="outline" size="sm" onClick={handleCopy} className="text-xs"&gt;
+            {copied ? &lt;Check className="mr-1 h-3.5 w-3.5" /&gt; : &lt;Copy className="mr-1 h-3.5 w-3.5" /&gt;}
+            {copied ? "Скопійовано" : "Копіювати"}
+          &lt;/Button&gt;
+          &lt;Button variant="outline" size="sm" onClick={handleExport} className="text-xs"&gt;
+            &lt;Download className="mr-1 h-3.5 w-3.5" /&gt;
+            .md
+          &lt;/Button&gt;
+          &lt;Button variant="outline" size="sm" onClick={handleExportZip} className="text-xs"&gt;
+            &lt;Archive className="mr-1 h-3.5 w-3.5" /&gt;
+            .zip
+          &lt;/Button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      {/* Document layout */}
+      &lt;div className="flex gap-0 rounded-xl border border-border bg-card overflow-hidden"&gt;
+        {/* TOC Sidebar */}
+        {showToc &amp;&amp; toc.length &gt; 0 &amp;&amp; (
+          &lt;aside className="w-72 shrink-0 border-r border-border bg-secondary/30 p-4 overflow-y-auto max-h-[80vh] hidden md:block"&gt;
+            &lt;p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3"&gt;Зміст документу&lt;/p&gt;
+            &lt;nav className="space-y-0.5"&gt;
+              {toc.map((item) =&gt; (
+                &lt;button
+                  key={item.id}
+                  onClick={() =&gt; scrollToSection(item.id)}
+                  className={`block w-full text-left text-sm py-1.5 px-2 rounded-md transition-colors truncate ${
+                    item.level === 3 ? "pl-5" : item.level === 4 ? "pl-8" : ""
+                  } ${
+                    activeId === item.id
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                  }`}
+                &gt;
+                  {item.text}
+                &lt;/button&gt;
+              ))}
+            &lt;/nav&gt;
+          &lt;/aside&gt;
+        )}
+
+        {/* Content area */}
+        &lt;div className="flex-1 p-8 md:p-10 overflow-y-auto max-h-[80vh]"&gt;
+          &lt;article className="prose prose-sm max-w-none
+            prose-headings:font-bold prose-headings:tracking-tight
+            prose-h2:text-xl prose-h2:mt-8 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-border
+            prose-h3:text-lg prose-h3:mt-6 prose-h3:mb-3
+            prose-p:text-muted-foreground prose-p:leading-relaxed
+            prose-li:text-muted-foreground
+            prose-strong:text-foreground
+            prose-table:text-sm
+            prose-th:bg-secondary prose-th:text-foreground prose-th:font-semibold prose-th:px-3 prose-th:py-2
+            prose-td:px-3 prose-td:py-2 prose-td:border-border
+            prose-a:text-primary prose-a:no-underline hover:prose-a:underline"
+          &gt;
+            &lt;ReactMarkdown
+              components={{
+                h2: ({ children }) =&gt; {
+                  const text = String(children);
+                  const id = generateHeadingId(text);
+                  return &lt;h2 id={id}&gt;{children}&lt;/h2&gt;;
+                },
+                h3: ({ children }) =&gt; {
+                  const text = String(children);
+                  const id = generateHeadingId(text);
+                  return &lt;h3 id={id}&gt;{children}&lt;/h3&gt;;
+                },
+                h4: ({ children }) =&gt; {
+                  const text = String(children);
+                  const id = generateHeadingId(text);
+                  return &lt;h4 id={id}&gt;{children}&lt;/h4&gt;;
+                },
+              }}
+            &gt;
+              {content}
+            &lt;/ReactMarkdown&gt;
+          &lt;/article&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  );
+};
+
+export default BriefResult;</code></pre>
+
+<hr>
+
+<h2>src/components/ContentForm.tsx</h2>
+<pre><code>import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Sparkles, Loader2, Copy, Check, Download } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import ReactMarkdown from "react-markdown";
+
+const ContentForm = () =&gt; {
+  const [topic, setTopic] = useState("");
+  const [keywords, setKeywords] = useState("");
+  const [tone, setTone] = useState("informational");
+  const [wordCount, setWordCount] = useState([2000]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [result, setResult] = useState&lt;string | null&gt;(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleGenerate = async () =&gt; {
+    if (!topic.trim()) return;
+    setIsLoading(true);
+    setResult(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-content", {
+        body: { topic, keywords, tone, wordCount: wordCount[0] },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      setResult(data.content);
+    } catch (e: any) {
+      console.error("Content generation error:", e);
+      toast.error(e.message || "Помилка генерації контенту");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleCopy = () =&gt; {
+    if (result) {
+      navigator.clipboard.writeText(result);
+      setCopied(true);
+      setTimeout(() =&gt; setCopied(false), 2000);
+    }
+  };
+
+  const handleExport = () =&gt; {
+    if (result) {
+      const blob = new Blob([result], { type: "text/markdown" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "generated-content.md";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  };
+
+  return (
+    &lt;div className="space-y-6"&gt;
+      &lt;Card&gt;
+        &lt;CardHeader&gt;
+          &lt;CardTitle className="flex items-center gap-2"&gt;
+            &lt;Sparkles className="h-5 w-5 text-primary" /&gt;
+            Генерація контенту
+          &lt;/CardTitle&gt;
+          &lt;CardDescription&gt;
+            Налаштуйте параметри та згенеруйте SEO-оптимізований контент за допомогою AI
+          &lt;/CardDescription&gt;
+        &lt;/CardHeader&gt;
+        &lt;CardContent className="space-y-4"&gt;
+          &lt;div className="space-y-2"&gt;
+            &lt;Label htmlFor="topic"&gt;Тема статті&lt;/Label&gt;
+            &lt;Input
+              id="topic"
+              placeholder="Наприклад: Повний гайд по вибору ноутбука у 2026 році"
+              value={topic}
+              onChange={(e) =&gt; setTopic(e.target.value)}
+            /&gt;
+          &lt;/div&gt;
+
+          &lt;div className="space-y-2"&gt;
+            &lt;Label htmlFor="keywords"&gt;Ключові слова (через кому)&lt;/Label&gt;
+            &lt;Textarea
+              id="keywords"
+              placeholder="ноутбук для роботи, вибір ноутбука, найкращі ноутбуки 2026"
+              value={keywords}
+              onChange={(e) =&gt; setKeywords(e.target.value)}
+              rows={2}
+            /&gt;
+          &lt;/div&gt;
+
+          &lt;div className="grid grid-cols-1 md:grid-cols-2 gap-4"&gt;
+            &lt;div className="space-y-2"&gt;
+              &lt;Label&gt;Тон контенту&lt;/Label&gt;
+              &lt;Select value={tone} onValueChange={setTone}&gt;
+                &lt;SelectTrigger&gt;&lt;SelectValue /&gt;&lt;/SelectTrigger&gt;
+                &lt;SelectContent&gt;
+                  &lt;SelectItem value="informational"&gt;Інформаційний&lt;/SelectItem&gt;
+                  &lt;SelectItem value="commercial"&gt;Комерційний&lt;/SelectItem&gt;
+                  &lt;SelectItem value="expert"&gt;Експертний&lt;/SelectItem&gt;
+                  &lt;SelectItem value="casual"&gt;Розмовний&lt;/SelectItem&gt;
+                &lt;/SelectContent&gt;
+              &lt;/Select&gt;
+            &lt;/div&gt;
+
+            &lt;div className="space-y-2"&gt;
+              &lt;Label&gt;Обсяг: ~{wordCount[0]} слів&lt;/Label&gt;
+              &lt;Slider
+                value={wordCount}
+                onValueChange={setWordCount}
+                min={500}
+                max={5000}
+                step={250}
+                className="mt-3"
+              /&gt;
+            &lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;Button
+            onClick={handleGenerate}
+            disabled={!topic.trim() || isLoading}
+            className="w-full bg-hero-gradient border-0 text-primary-foreground hover:opacity-90"
+          &gt;
+            {isLoading ? (
+              &lt;&gt;&lt;Loader2 className="mr-2 h-4 w-4 animate-spin" /&gt; AI генерує контент...&lt;/&gt;
+            ) : (
+              &lt;&gt;&lt;Sparkles className="mr-2 h-4 w-4" /&gt; Згенерувати контент&lt;/&gt;
+            )}
+          &lt;/Button&gt;
+        &lt;/CardContent&gt;
+      &lt;/Card&gt;
+
+      {result &amp;&amp; (
+        &lt;Card&gt;
+          &lt;CardHeader&gt;
+            &lt;div className="flex items-center justify-between"&gt;
+              &lt;CardTitle className="text-lg"&gt;Результат генерації&lt;/CardTitle&gt;
+              &lt;div className="flex items-center gap-2"&gt;
+                &lt;Button variant="outline" size="sm" onClick={handleCopy}&gt;
+                  {copied ? &lt;Check className="mr-1 h-3.5 w-3.5" /&gt; : &lt;Copy className="mr-1 h-3.5 w-3.5" /&gt;}
+                  {copied ? "Скопійовано" : "Копіювати"}
+                &lt;/Button&gt;
+                &lt;Button variant="outline" size="sm" onClick={handleExport}&gt;
+                  &lt;Download className="mr-1 h-3.5 w-3.5" /&gt;
+                  Експорт .md
+                &lt;/Button&gt;
+              &lt;/div&gt;
+            &lt;/div&gt;
+          &lt;/CardHeader&gt;
+          &lt;CardContent&gt;
+            &lt;article className="prose prose-sm max-w-none prose-headings:font-bold prose-h2:text-xl prose-h3:text-lg prose-p:text-muted-foreground prose-li:text-muted-foreground prose-strong:text-foreground prose-a:text-primary"&gt;
+              &lt;ReactMarkdown&gt;{result}&lt;/ReactMarkdown&gt;
+            &lt;/article&gt;
+          &lt;/CardContent&gt;
+        &lt;/Card&gt;
+      )}
+    &lt;/div&gt;
+  );
+};
+
+export default ContentForm;</code></pre>
+
+<hr>
+
+<h2>src/components/NavLink.tsx</h2>
+<pre><code>import { cn } from "@/lib/utils";
+
+interface NavLinkProps {
+  href: string;
+  children: React.ReactNode;
+  active?: boolean;
+}
+
+const NavLink = ({ href, children, active }: NavLinkProps) =&gt; (
+  &lt;a
+    href={href}
+    className={cn(
+      "text-sm font-medium transition-colors hover:text-primary",
+      active ? "text-primary" : "text-muted-foreground"
+    )}
+  &gt;
+    {children}
+  &lt;/a&gt;
+);
+
+export default NavLink;</code></pre>
+
+<hr>
+
+<h2>src/hooks/use-mobile.tsx</h2>
+<pre><code>import * as React from "react";
+
+const MOBILE_BREAKPOINT = 768;
+
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState&lt;boolean | undefined&gt;(undefined);
+
+  React.useEffect(() =&gt; {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`);
+    const onChange = () =&gt; setIsMobile(window.innerWidth &lt; MOBILE_BREAKPOINT);
+    mql.addEventListener("change", onChange);
+    setIsMobile(window.innerWidth &lt; MOBILE_BREAKPOINT);
+    return () =&gt; mql.removeEventListener("change", onChange);
+  }, []);
+
+  return !!isMobile;
+}</code></pre>
+
+<hr>
+
+<h2>src/hooks/use-toast.ts</h2>
+<pre><code>import * as React from "react";
+import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
+
+const TOAST_LIMIT = 1;
+const TOAST_REMOVE_DELAY = 1000000;
+
+type ToasterToast = ToastProps &amp; {
+  id: string;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
+  action?: ToastActionElement;
+};
+
+const actionTypes = {
+  ADD_TOAST: "ADD_TOAST",
+  UPDATE_TOAST: "UPDATE_TOAST",
+  DISMISS_TOAST: "DISMISS_TOAST",
+  REMOVE_TOAST: "REMOVE_TOAST",
+} as const;
+
+let count = 0;
+
+function genId() {
+  count = (count + 1) % Number.MAX_SAFE_INTEGER;
+  return count.toString();
+}
+
+type ActionType = typeof actionTypes;
+
+type Action =
+  | { type: ActionType["ADD_TOAST"]; toast: ToasterToast; }
+  | { type: ActionType["UPDATE_TOAST"]; toast: Partial&lt;ToasterToast&gt;; }
+  | { type: ActionType["DISMISS_TOAST"]; toastId?: ToasterToast["id"]; }
+  | { type: ActionType["REMOVE_TOAST"]; toastId?: ToasterToast["id"]; };
+
+interface State { toasts: ToasterToast[]; }
+
+const toastTimeouts = new Map&lt;string, ReturnType&lt;typeof setTimeout&gt;&gt;();
+
+const addToRemoveQueue = (toastId: string) =&gt; {
+  if (toastTimeouts.has(toastId)) return;
+  const timeout = setTimeout(() =&gt; {
+    toastTimeouts.delete(toastId);
+    dispatch({ type: "REMOVE_TOAST", toastId });
+  }, TOAST_REMOVE_DELAY);
+  toastTimeouts.set(toastId, timeout);
+};
+
+export const reducer = (state: State, action: Action): State =&gt; {
+  switch (action.type) {
+    case "ADD_TOAST":
+      return { ...state, toasts: [action.toast, ...state.toasts].slice(0, TOAST_LIMIT) };
+    case "UPDATE_TOAST":
+      return { ...state, toasts: state.toasts.map((t) =&gt; (t.id === action.toast.id ? { ...t, ...action.toast } : t)) };
+    case "DISMISS_TOAST": {
+      const { toastId } = action;
+      if (toastId) { addToRemoveQueue(toastId); }
+      else { state.toasts.forEach((toast) =&gt; addToRemoveQueue(toast.id)); }
+      return { ...state, toasts: state.toasts.map((t) =&gt; (t.id === toastId || toastId === undefined ? { ...t, open: false } : t)) };
+    }
+    case "REMOVE_TOAST":
+      if (action.toastId === undefined) return { ...state, toasts: [] };
+      return { ...state, toasts: state.toasts.filter((t) =&gt; t.id !== action.toastId) };
+  }
+};
+
+const listeners: Array&lt;(state: State) =&gt; void&gt; = [];
+let memoryState: State = { toasts: [] };
+
+function dispatch(action: Action) {
+  memoryState = reducer(memoryState, action);
+  listeners.forEach((listener) =&gt; listener(memoryState));
+}
+
+type Toast = Omit&lt;ToasterToast, "id"&gt;;
+
+function toast({ ...props }: Toast) {
+  const id = genId();
+  const update = (props: ToasterToast) =&gt; dispatch({ type: "UPDATE_TOAST", toast: { ...props, id } });
+  const dismiss = () =&gt; dispatch({ type: "DISMISS_TOAST", toastId: id });
+  dispatch({ type: "ADD_TOAST", toast: { ...props, id, open: true, onOpenChange: (open) =&gt; { if (!open) dismiss(); } } });
+  return { id, dismiss, update };
+}
+
+function useToast() {
+  const [state, setState] = React.useState&lt;State&gt;(memoryState);
+  React.useEffect(() =&gt; {
+    listeners.push(setState);
+    return () =&gt; { const index = listeners.indexOf(setState); if (index &gt; -1) listeners.splice(index, 1); };
+  }, [state]);
+  return { ...state, toast, dismiss: (toastId?: string) =&gt; dispatch({ type: "DISMISS_TOAST", toastId }) };
+}
+
+export { useToast, toast };</code></pre>
+
+<hr>
+
+<h2>src/integrations/supabase/client.ts</h2>
+<pre><code>// This file is automatically generated. Do not edit it directly.
+import { createClient } from '@supabase/supabase-js';
+import type { Database } from './types';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+export const supabase = createClient&lt;Database&gt;(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    storage: localStorage,
+    persistSession: true,
+    autoRefreshToken: true,
+  }
+});</code></pre>
+
+<hr>
+
+<h2>src/test/setup.ts</h2>
+<pre><code>import "@testing-library/jest-dom";
+
+Object.defineProperty(window, "matchMedia", {
+  writable: true,
+  value: (query: string) =&gt; ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: () =&gt; {},
+    removeListener: () =&gt; {},
+    addEventListener: () =&gt; {},
+    removeEventListener: () =&gt; {},
+    dispatchEvent: () =&gt; {},
+  }),
+});</code></pre>
+
+<hr>
+
+<h2>src/test/example.test.ts</h2>
+<pre><code>import { describe, it, expect } from "vitest";
+
+describe("example", () =&gt; {
+  it("should pass", () =&gt; {
+    expect(true).toBe(true);
+  });
+});</code></pre>
+
+<hr>
+
+<h2>supabase/functions/generate-brief/index.ts</h2>
+<pre><code>import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+const ENGINE_IDS: Record&lt;string, number&gt; = {
+  ua: 1830,
+  us: 1,
+  eu: 17,
+};
+
+interface ScrapedPage {
+  url: string;
+  title: string;
+  position: number;
+  wordCount: number;
+  imageCount: number;
+  h1: string[];
+  h2: string[];
+  h3: string[];
+}
+
+async function scrapePage(url: string): Promise&lt;Omit&lt;ScrapedPage, 'url' | 'title' | 'position'&gt; | null&gt; {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() =&gt; controller.abort(), 8000);
+
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml",
+        "Accept-Language": "uk,en;q=0.9",
+      },
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (!res.ok) return null;
+
+    const contentType = res.headers.get("content-type") || "";
+    if (!contentType.includes("text/html")) return null;
+
+    const html = await res.text();
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    if (!doc) return null;
+
+    for (const tag of ["script", "style", "nav", "footer", "header", "aside"]) {
+      doc.querySelectorAll(tag).forEach((el: any) =&gt; el.remove());
+    }
+
+    const bodyText = (doc.querySelector("body")?.textContent || "").replace(/\s+/g, " ").trim();
+    const wordCount = bodyText.split(/\s+/).filter(Boolean).length;
+
+    const imageCount = doc.querySelectorAll("img").length;
+
+    const extractHeadings = (tag: string): string[] =&gt; {
+      const headings: string[] = [];
+      doc.querySelectorAll(tag).forEach((el: any) =&gt; {
+        const text = (el.textContent || "").trim();
+        if (text &amp;&amp; text.length &lt; 200) headings.push(text);
+      });
+      return headings;
+    };
+
+    return {
+      wordCount,
+      imageCount,
+      h1: extractHeadings("h1"),
+      h2: extractHeadings("h2"),
+      h3: extractHeadings("h3"),
+    };
+  } catch (e) {
+    console.warn(`Failed to scrape ${url}:`, e instanceof Error ? e.message : e);
+    return null;
+  }
+}
+
+async function scrapeCompetitors(serpResults: any[]): Promise&lt;ScrapedPage[]&gt; {
+  const pages: ScrapedPage[] = [];
+
+  const urls = serpResults.slice(0, 10).map((item, i) =&gt; ({
+    url: item.url || item.link || "",
+    title: item.title || "N/A",
+    position: item.position || (i + 1),
+  }));
+
+  const scrapePromises = urls.map(async ({ url, title, position }) =&gt; {
+    if (!url || url === "N/A") return null;
+    const scraped = await scrapePage(url);
+    if (!scraped) return { url, title, position, wordCount: 0, imageCount: 0, h1: [], h2: [], h3: [] };
+    return { url, title, position, ...scraped };
+  });
+
+  const results = await Promise.all(scrapePromises);
+  for (const r of results) {
+    if (r) pages.push(r);
+  }
+
+  return pages;
+}
+
+function formatScrapedTable(pages: ScrapedPage[]): string {
+  if (!pages.length) return "";
+
+  let table = "| № | URL | Title | Слів | H1 | H2 | H3 | Зображень |\n|---|-----|-------|------|----|----|----|-----------|\n";
+  pages.forEach((p, i) =&gt; {
+    const shortUrl = p.url.length &gt; 50 ? p.url.substring(0, 47) + "..." : p.url;
+    const title = (p.title || "N/A").replace(/\|/g, "\\|").substring(0, 60);
+    table += `| ${i + 1} | ${shortUrl} | ${title} | ${p.wordCount} | ${p.h1.length} | ${p.h2.length} | ${p.h3.length} | ${p.imageCount} |\n`;
+  });
+  return table;
+}
+
+function formatHeadingsDetail(pages: ScrapedPage[]): string {
+  let detail = "";
+  pages.forEach((p, i) =&gt; {
+    if (p.h1.length === 0 &amp;&amp; p.h2.length === 0 &amp;&amp; p.h3.length === 0) return;
+    detail += `\n**Конкурент ${i + 1}** (${p.url}):\n`;
+    if (p.h1.length) detail += `- H1: ${p.h1.map(h =&gt; \`"\${h}"\`).join(", ")}\n`;
+    if (p.h2.length) detail += `- H2 (${p.h2.length}): ${p.h2.slice(0, 15).map(h =&gt; \`"\${h}"\`).join(", ")}${p.h2.length &gt; 15 ? "..." : ""}\n`;
+    if (p.h3.length) detail += `- H3 (${p.h3.length}): ${p.h3.slice(0, 10).map(h =&gt; \`"\${h}"\`).join(", ")}${p.h3.length &gt; 10 ? "..." : ""}\n`;
+  });
+  return detail;
+}
+
+async function fetchSerpFromSeRanking(keyword: string, region: string, apiKey: string): Promise&lt;any[] | null&gt; {
+  const engineId = ENGINE_IDS[region] || ENGINE_IDS.ua;
+
+  try {
+    console.log(`Creating SERP task for "${keyword}" with engine_id ${engineId}`);
+    const createRes = await fetch("https://api.seranking.com/v1/serp/tasks", {
+      method: "POST",
+      headers: {
+        "Authorization": `Token ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ engine_id: engineId, query: [keyword] }),
+    });
+
+    if (!createRes.ok) {
+      console.error("SE Ranking create task error:", createRes.status, await createRes.text());
+      return null;
+    }
+
+    const createData = await createRes.json();
+    const firstItem = Array.isArray(createData) ? createData[0] : createData;
+    const taskId = firstItem?.task_id || firstItem?.data?.task_id || firstItem?.id;
+    if (!taskId) {
+      console.error("No task_id in response:", JSON.stringify(createData));
+      return null;
+    }
+
+    const maxAttempts = 18;
+    for (let i = 0; i &lt; maxAttempts; i++) {
+      await new Promise((r) =&gt; setTimeout(r, 5000));
+      console.log(`Polling SERP task ${taskId}, attempt ${i + 1}/${maxAttempts}`);
+
+      const statusRes = await fetch(`https://api.seranking.com/v1/serp/tasks/status?task_id=${taskId}`, {
+        headers: { "Authorization": `Token ${apiKey}` },
+      });
+
+      if (!statusRes.ok) continue;
+
+      const statusData = await statusRes.json();
+      const status = statusData?.status || statusData?.data?.status;
+
+      if (status === "done" || status === "completed") {
+        const results = statusData?.results || statusData?.data?.results || statusData?.data || [];
+        const items = Array.isArray(results) ? results : (results?.items || results?.organic || []);
+        return items.slice(0, 10);
+      }
+
+      if (status === "error" || status === "failed") {
+        console.error("SERP task failed:", JSON.stringify(statusData));
+        return null;
+      }
+    }
+
+    console.warn("SERP task polling timeout");
+    return null;
+  } catch (e) {
+    console.error("SE Ranking API error:", e);
+    return null;
+  }
+}
+
+serve(async (req) =&gt; {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  try {
+    const { keyword, language, region, contentType } = await req.json();
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const SE_RANKING_API_KEY = Deno.env.get("SE_RANKING_API_KEY");
+
+    const langMap: Record&lt;string, string&gt; = { uk: "українською мовою", ru: "на русском языке", en: "in English" };
+    const typeMap: Record&lt;string, string&gt; = { article: "інформаційна стаття", landing: "лендінг/посадкова сторінка", product: "картка товару", category: "сторінка категорії" };
+    const regionMap: Record&lt;string, string&gt; = { ua: "Україна", us: "USA", eu: "Europe" };
+
+    let serpResults: any[] | null = null;
+    if (SE_RANKING_API_KEY) {
+      console.log("Fetching SERP data from SE Ranking...");
+      serpResults = await fetchSerpFromSeRanking(keyword, region, SE_RANKING_API_KEY);
+    }
+
+    let scrapedPages: ScrapedPage[] = [];
+    let scrapedTable = "";
+    let headingsDetail = "";
+
+    if (serpResults &amp;&amp; serpResults.length &gt; 0) {
+      console.log(`Scraping ${serpResults.length} competitor pages...`);
+      scrapedPages = await scrapeCompetitors(serpResults);
+      scrapedTable = formatScrapedTable(scrapedPages);
+      headingsDetail = formatHeadingsDetail(scrapedPages);
+      console.log(`Successfully scraped ${scrapedPages.filter(p =&gt; p.wordCount &gt; 0).length}/${scrapedPages.length} pages`);
+    }
+
+    const serpSection = scrapedPages.length &gt; 0
+      ? `\n\nРЕАЛЬНІ ДАНІ КОНКУРЕНТІВ (ТОП-10 Google) для "${keyword}":\n\nТаблиця конкурентів:\n${scrapedTable}\n\nДетальна структура заголовків конкурентів:\n${headingsDetail}\n\nВикористай ці РЕАЛЬНІ дані у розділах 3.2, 3.3, 3.5. Аналізуй реальну кількість слів, заголовків та зображень для рекомендацій.`
+      : serpResults &amp;&amp; serpResults.length &gt; 0
+        ? `\n\nДані SERP (URL та Title) для "${keyword}" отримано, але скрапінг сторінок не вдався. Доповни таблицю на основі своїх знань.`
+        : `\nРеальних даних SERP немає. Вигадай реалістичні дані для 10 конкурентів у розділі 3.2.`;
+
+    const systemPrompt = `Ти — досвідчений SEO-стратег та контент-менеджер з 10+ років досвіду. Створюєш детальні технічні завдання (ТЗ) для копірайтерів, які виглядають як професійний документ.
+Відповідай ${langMap[language] || "українською мовою"}.
+Формат відповіді — Markdown з чіткою нумерацією розділів та підрозділів.
+Використовуй ## для основних розділів (1, 2, 3...) та ### для підрозділів (3.1, 3.2...) та #### для під-підрозділів (3.1.1, 3.1.2...).`;
+
+    const userPrompt = `Створи детальне професійне технічне завдання (ТЗ) для написання контенту на тему: "${keyword}"
+
+Параметри:
+- Тип контенту: ${typeMap[contentType] || contentType}
+- Регіон: ${regionMap[region] || region}
+${serpSection}
+
+ТЗ повинно мати таку ТОЧНУ структуру з нумерацією:
+
+## 1) Мета та результат
+...
+
+## 2) Основні ролі
+...
+
+## 3) Функціональні вимоги
+
+### 3.1 Вхідні дані
+...
+
+### 3.2 SERP-конкуренти (ТОП-10)
+...
+
+### 3.3 Рекомендовані параметри тексту
+...
+
+### 3.4 Ключові слова конкурентів
+...
+
+### 3.5 Структура заголовків (H1-H3)
+...
+
+### 3.6 Посилання
+...
+
+### 3.7 Питання (FAQ / People Also Ask)
+...
+
+### 3.8 Мета-теги та slug
+...
+
+### 3.9 Вимоги до контенту
+...
+
+### 3.10 Експорт / формат здачі
+...
+
+ВАЖЛИВО: Дотримуйся нумерації розділів. Кожен розділ має бути інформативним та конкретним. Таблиці використовуй де зазначено.`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      const status = response.status;
+      const t = await response.text();
+      console.error("AI gateway error:", status, t);
+      if (status === 429) {
+        return new Response(JSON.stringify({ error: "Перевищено ліміт запитів. Спробуйте пізніше." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (status === 402) {
+        return new Response(JSON.stringify({ error: "Необхідно поповнити кредити AI." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      throw new Error(`AI gateway error: ${status}`);
+    }
+
+    const responseText = await response.text();
+    if (!responseText) throw new Error("Empty response from AI gateway");
+    let data;
+    try {
+      data = JSON.parse(responseText);
+    } catch {
+      console.error("Failed to parse AI response:", responseText.substring(0, 500));
+      throw new Error("Invalid JSON from AI gateway");
+    }
+    const content = data.choices?.[0]?.message?.content || "Не вдалося згенерувати ТЗ.";
+
+    return new Response(JSON.stringify({
+      content,
+      serpDataUsed: serpResults !== null &amp;&amp; serpResults.length &gt; 0,
+      pagesScraped: scrapedPages.filter(p =&gt; p.wordCount &gt; 0).length,
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    console.error("generate-brief error:", e);
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});</code></pre>
+
+<hr>
+
+<h2>supabase/functions/generate-content/index.ts</h2>
+<pre><code>import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
+
+serve(async (req) =&gt; {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  try {
+    const { topic, keywords, tone, wordCount } = await req.json();
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const toneMap: Record&lt;string, string&gt; = {
+      informational: "інформаційний, нейтральний, навчальний",
+      commercial: "комерційний, переконливий, з закликами до дії",
+      expert: "експертний, глибокий, з технічними деталями",
+      casual: "розмовний, дружній, легкий для сприйняття",
+    };
+
+    const systemPrompt = `Ти — професійний SEO-копірайтер з 10+ років досвіду. Пишеш унікальний, корисний та SEO-оптимізований контент українською мовою.
+Формат — Markdown з правильною ієрархією заголовків (H1, H2, H3).
+Контент повинен бути структурований, з таблицями, списками, FAQ.`;
+
+    const userPrompt = `Напиши SEO-оптимізовану статтю на тему: "${topic}"
+
+Параметри:
+- Обсяг: приблизно ${wordCount} слів
+- Тон: ${toneMap[tone] || tone}
+${keywords ? `- Ключові слова для інтеграції: ${keywords}` : ""}
+
+Вимоги:
+1. Привабливий вступ з хуком
+2. Мінімум 5-7 розділів з H2 заголовками
+3. Використовуй H3 для підрозділів
+4. Додай списки, таблиці порівняння де доречно
+5. Розділ FAQ з 4-5 питаннями
+6. Сильний висновок з CTA
+7. Природна інтеграція ключових слів (density 1.5-2.5%)
+8. Контент має відповідати E-E-A-T принципам`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      const status = response.status;
+      if (status === 429) {
+        return new Response(JSON.stringify({ error: "Перевищено ліміт запитів. Спробуйте пізніше." }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (status === 402) {
+        return new Response(JSON.stringify({ error: "Необхідно поповнити кредити AI." }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const t = await response.text();
+      console.error("AI gateway error:", status, t);
+      throw new Error(`AI gateway error: ${status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || "Не вдалося згенерувати контент.";
+
+    return new Response(JSON.stringify({ content }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  } catch (e) {
+    console.error("generate-content error:", e);
+    return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});</code></pre>
+
+<hr>
+
+<p class="note">UI-компоненты shadcn (src/components/ui/*) не включены, так как это стандартные компоненты библиотеки shadcn/ui.</p>
+
+</body>
+</html>
