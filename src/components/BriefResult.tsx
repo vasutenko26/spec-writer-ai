@@ -1,7 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
-import { Download, Copy, Check, List, X } from "lucide-react";
+import { Download, Copy, Check, List, X, Archive } from "lucide-react";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 interface TocItem {
   id: string;
