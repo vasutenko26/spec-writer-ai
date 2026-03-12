@@ -1,7 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
-import { Download, Copy, Check, List, X } from "lucide-react";
+import { Download, Copy, Check, List, X, Archive } from "lucide-react";
+import JSZip from "jszip";
+import { saveAs } from "file-saver";
 
 interface TocItem {
   id: string;
@@ -43,6 +45,24 @@ const BriefResult = ({ content }: { content: string }) => {
     a.download = "technical-brief.md";
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleExportZip = async () => {
+    const zip = new JSZip();
+    zip.file("technical-brief.md", content);
+
+    // Convert markdown to simple HTML for convenience
+    const htmlContent = `<!DOCTYPE html>
+<html lang="uk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Технічне завдання</title>
+<style>body{font-family:system-ui,sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem;line-height:1.6;color:#1a1a1a}
+h1,h2,h3{margin-top:1.5em}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ddd;padding:8px;text-align:left}
+th{background:#f5f5f5}ul,ol{padding-left:1.5em}</style></head><body>${content}</body></html>`;
+    zip.file("technical-brief.html", htmlContent);
+    zip.file("technical-brief.txt", content.replace(/[#*`|_\-\[\]]/g, ""));
+
+    const blob = await zip.generateAsync({ type: "blob" });
+    saveAs(blob, "technical-brief.zip");
   };
 
   const scrollToSection = (id: string) => {
@@ -94,7 +114,11 @@ const BriefResult = ({ content }: { content: string }) => {
           </Button>
           <Button variant="outline" size="sm" onClick={handleExport} className="text-xs">
             <Download className="mr-1 h-3.5 w-3.5" />
-            Експорт .md
+            .md
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportZip} className="text-xs">
+            <Archive className="mr-1 h-3.5 w-3.5" />
+            .zip
           </Button>
         </div>
       </div>
