@@ -1,0 +1,16 @@
+use_default_settings: true
+
+general:
+  debug: false
+  instance_name: "ContentForge Search"
+
+search:
+  safe_search: 0
+  formats:
+    - html
+    - json
+
+server:
+  secret_key: "contentforge-searxng-secret-32chars!!"
+  limiter: false
+  image_proxy: false

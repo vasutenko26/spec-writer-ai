@@ -100,3 +100,35 @@
     background-image: var(--hero-gradient);
   }
 }
+
+/* ── Prose table overrides (markdown-rendered tables) ────────────────────── */
+@layer components {
+  .prose table {
+    @apply w-full border-collapse text-sm my-4 rounded-lg overflow-hidden;
+    border: 1px solid hsl(var(--border));
+  }
+  .prose thead {
+    @apply bg-secondary;
+  }
+  .prose thead th {
+    @apply px-3 py-2 text-left font-semibold text-xs text-foreground border border-border whitespace-nowrap;
+  }
+  .prose tbody tr {
+    @apply border-b border-border;
+  }
+  .prose tbody tr:nth-child(even) {
+    @apply bg-secondary/40;
+  }
+  .prose tbody tr:hover {
+    @apply bg-secondary/60 transition-colors;
+  }
+  .prose tbody td {
+    @apply px-3 py-2 text-xs border border-border;
+  }
+  .prose :not(pre) > code {
+    @apply bg-secondary px-1.5 py-0.5 rounded text-xs font-mono;
+  }
+  .prose blockquote {
+    @apply border-l-4 border-primary/50 bg-primary/5 px-4 py-2 not-italic text-foreground/80;
+  }
+}

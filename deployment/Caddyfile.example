@@ -1,0 +1,28 @@
+# ContentForge Caddy Configuration
+# Replace yourdomain.com with your actual domain
+
+yourdomain.com, www.yourdomain.com {
+    encode gzip
+
+    # Security headers
+    header {
+        Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://generativelanguage.googleapis.com; frame-ancestors 'none'"
+        X-Frame-Options "DENY"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    # API requests to Node.js backend
+    handle /api/* {
+        reverse_proxy 127.0.0.1:3001 {
+            flush_interval -1
+        }
+    }
+
+    # Frontend static files (React SPA)
+    handle {
+        root * /var/www/spec-writer-ai
+        file_server
+        try_files {path} /index.html
+    }
+}

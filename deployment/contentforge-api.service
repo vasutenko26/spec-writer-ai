@@ -1,0 +1,20 @@
+[Unit]
+Description=ContentForge API Server (Gemini + SearXNG)
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/spec-writer-ai/server
+ExecStart=/usr/bin/node index.js
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=contentforge-api
+
+# Environment variables (optional - can also use .env file)
+# Environment="NODE_ENV=production"
+
+[Install]
+WantedBy=multi-user.target
